@@ -1,0 +1,24 @@
+# Dependencias
+node_modules/
+
+# Reportes de cobertura
+coverage/
+
+# Bases de datos SQLite locales y respaldos
+*.sqlite
+database.sqlite
+database.test.sqlite
+backups/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variables de entorno
+.env
+.env.local
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
