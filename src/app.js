@@ -30,6 +30,7 @@ app.get("/api/health", (req, res) => {
   return res.status(200).json({
     statusCode: 200,
     status: "OK",
+    mensaje: "funciona",
     timestamp: new Date().toISOString()
   });
 });
@@ -54,8 +55,9 @@ const iniciarServidor = async () => {
     await sequelize.sync();
     console.log("Tablas creadas correctamente");
 
-    return app.listen(PORT, () => {
-      console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+    // IMPORTANTE: Agregamos '0.0.0.0' para permitir tráfico externo desde AWS
+    return app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Servidor ejecutándose en http://0.0.0.0:${PORT}`);
     });
   } catch (error) {
     console.error("Error al iniciar el servidor:", error.message);
