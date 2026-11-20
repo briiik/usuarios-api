@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
 app.get("/api/health", (req, res) => {
   return res.status(200).json({
     statusCode: 200,
-    status: "OK",
+    status: "OK 2",
     mensaje: "Servidor funcionando correctamente",
     timestamp: new Date().toISOString()
   });
