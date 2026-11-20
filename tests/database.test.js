@@ -75,7 +75,7 @@ describe("Endpoints de Mantenimiento de Base de Datos (/api/database)", () => {
   test("GET /api/health debe retornar 200 con status OK", async () => {
     const res = await request(app).get("/api/health");
     expect(res.statusCode).toBe(200);
-    expect(res.body.status).toBe("OK");
+    expect(res.body.status).toBe("OK 2");
   });
 
   test("GET ruta inexistente debe retornar 404", async () => {
