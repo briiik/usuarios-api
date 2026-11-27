@@ -1,4 +1,4 @@
-name: CI/CD Pipeline - Usuarios API
+name: CI/CD Pipeline - Usuarios API con Observabilidad y Playwright
 
 on:
   push:
@@ -8,10 +8,10 @@ on:
 
 jobs:
   # ==========================================
-  # FASE 1: INTEGRACIÓN CONTINUA (CI) - TESTS Y COBERTURA
+  # FASE 1: INTEGRACIÓN CONTINUA (CI) - TESTS JEST Y PLAYWRIGHT
   # ==========================================
   test:
-    name: Pruebas Automatizadas y Cobertura
+    name: Pruebas Automatizadas (Jest + Playwright)
     runs-on: ubuntu-latest
 
     steps:
@@ -24,11 +24,78 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - name: Instalar dependencias
+      - name: Instalar dependencias Node.js
         run: npm ci
 
       - name: Ejecutar pruebas unitarias y verificar cobertura (umbral 70%)
         run: npm test
+
+      - name: Configurar Python 3.13 para Playwright
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Instalar dependencias de pruebas E2E (pytest, playwright, pytest-html)
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-html pytest-playwright requests psutil
+          playwright install --with-deps chromium
+
+      - name: Iniciar servidor en segundo plano para pruebas E2E
+        run: |
+          node src/server.js &
+          sleep 4
+
+      - name: Ejecutar pruebas de extremo a extremo con Playwright
+        run: |
+          python -m pytest tests_e2e --html=reporte_playwright_usuarios.html --self-contained-html -v
+
+      - name: Subir artefacto de reporte Playwright HTML
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reporte-playwright-html
+          path: reporte_playwright_usuarios.html
+
+      # RF-03: Notificación de ÉXITO de pruebas a OpenObserve
+      - name: Registrar ÉXITO de pruebas en OpenObserve
+        if: success()
+        run: |
+          if [ -n "${{ secrets.OPENOBSERVE_AUTH }}" ] && [ -n "${{ secrets.OPENOBSERVE_ENDPOINT }}" ]; then
+            curl -s -X POST "${{ secrets.OPENOBSERVE_ENDPOINT }}/api/${{ secrets.OPENOBSERVE_ORG || 'default' }}/pipeline_ci_logs/_json" \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Basic ${{ secrets.OPENOBSERVE_AUTH }}" \
+              -d '[{
+                "evento": "CI_PRUEBAS_APROBADAS",
+                "estado": "SUCCESS",
+                "commit": "${{ github.sha }}",
+                "rama": "${{ github.ref_name }}",
+                "autor": "${{ github.actor }}",
+                "mensaje": "Todas las pruebas unitarias y de Playwright pasaron exitosamente",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }]' || true
+          else
+            echo "[INFO] Credenciales de OpenObserve no configuradas; omitiendo telemetría remota."
+          fi
+
+      # RF-03: Notificación de FALLO de pruebas a OpenObserve (Criterio 1: Bloquea despliegue)
+      - name: Registrar FALLO de pruebas en OpenObserve
+        if: failure()
+        run: |
+          if [ -n "${{ secrets.OPENOBSERVE_AUTH }}" ] && [ -n "${{ secrets.OPENOBSERVE_ENDPOINT }}" ]; then
+            curl -s -X POST "${{ secrets.OPENOBSERVE_ENDPOINT }}/api/${{ secrets.OPENOBSERVE_ORG || 'default' }}/pipeline_ci_logs/_json" \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Basic ${{ secrets.OPENOBSERVE_AUTH }}" \
+              -d '[{
+                "evento": "CI_PRUEBAS_FALLIDAS",
+                "estado": "FAILED",
+                "commit": "${{ github.sha }}",
+                "rama": "${{ github.ref_name }}",
+                "autor": "${{ github.actor }}",
+                "mensaje": "Fallo detectado en las pruebas. Despliegue condicionado cancelado.",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }]' || true
+          fi
 
   # ==========================================
   # FASE 2: GESTIÓN DE ARTEFACTOS - DOCKER BUILD & PUSH
@@ -62,10 +129,10 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/usuarios-api:${{ github.sha }}
 
   # ==========================================
-  # FASE 3: DESPLIEGUE CONTINUO (CD) - AWS EC2
+  # FASE 3: DESPLIEGUE CONTINUO (CD) CONDICIONADO - AWS EC2
   # ==========================================
   deploy:
-    name: Despliegue en AWS EC2
+    name: Despliegue en AWS EC2 y Registro OpenObserve
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -101,3 +168,23 @@ jobs:
             docker image prune -f
             
             echo ">>> Despliegue completado con éxito en el puerto 80."
+
+      # RF-03 & Criterio 2: Registrar evento de despliegue completado en OpenObserve
+      - name: Registrar despliegue exitoso en OpenObserve
+        if: success()
+        run: |
+          if [ -n "${{ secrets.OPENOBSERVE_AUTH }}" ] && [ -n "${{ secrets.OPENOBSERVE_ENDPOINT }}" ]; then
+            curl -s -X POST "${{ secrets.OPENOBSERVE_ENDPOINT }}/api/${{ secrets.OPENOBSERVE_ORG || 'default' }}/deploy_events/_json" \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Basic ${{ secrets.OPENOBSERVE_AUTH }}" \
+              -d '[{
+                "evento": "CD_DESPLIEGUE_EXITOSO",
+                "estado": "SUCCESS",
+                "servidor": "AWS-EC2",
+                "ip_host": "${{ secrets.EC2_HOST }}",
+                "puerto": 80,
+                "commit": "${{ github.sha }}",
+                "imagen": "${{ secrets.DOCKERHUB_USERNAME }}/usuarios-api:latest",
+                "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+              }]' || true
+          fi

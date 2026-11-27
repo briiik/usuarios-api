@@ -6,7 +6,8 @@ module.exports = {
   coverageDirectory: "coverage",
   collectCoverageFrom: [
     "src/**/*.js",
-    "!src/server.js"
+    "!src/server.js",
+    "!src/config/seed.js"
   ],
   coverageThreshold: {
     global: {

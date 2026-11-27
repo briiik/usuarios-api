@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">reporte_playwright_usuarios.html</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">reporte_playwright_usuarios.html</h1>
+    <p>Report generated on 26-Nov-2026 at 18:45:57 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.2.0</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="4">No results found. Check the filters.</td>
+        </tr>
+      </tbody>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="4">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left">&lt;</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">&gt;</div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">160 tests took 00:03:09.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled>
+            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" >
+            <span class="passed">160 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled>
+            <span class="rerun">0 Reruns</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="retried" disabled>
+            <span class="retried">0 Retried,</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+    </table>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.13.1&#34;, &#34;Platform&#34;: &#34;Windows-11-10.0.26300-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;9.2.0&#34;, &#34;pluggy&#34;: &#34;1.7.0&#34;}, &#34;Plugins&#34;: {&#34;anyio&#34;: &#34;4.14.0&#34;, &#34;html&#34;: &#34;4.2.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;, &#34;playwright&#34;: &#34;0.10.0&#34;}, &#34;JAVA_HOME&#34;: &#34;C:\\Program Files\\Eclipse Adoptium\\jdk-21.0.11.10-hotspot&#34;}, &#34;tests&#34;: {&#34;tests_e2e/test_frontend_usuarios.py::test_0001_validar_titulo_oficial[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0001_validar_titulo_oficial[chromium]&#34;, &#34;duration&#34;: &#34;00:00:05&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0001_validar_titulo_oficial[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:05&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0002_validar_badge_salud_healthcheck[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0002_validar_badge_salud_healthcheck[chromium]&#34;, &#34;duration&#34;: &#34;612 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0002_validar_badge_salud_healthcheck[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;612 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0003_validar_tarjetas_metricas[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0003_validar_tarjetas_metricas[chromium]&#34;, &#34;duration&#34;: &#34;597 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0003_validar_tarjetas_metricas[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;597 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0004_validar_formulario_roles[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0004_validar_formulario_roles[chromium]&#34;, &#34;duration&#34;: &#34;541 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0004_validar_formulario_roles[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;541 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0005_validar_formulario_usuarios[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0005_validar_formulario_usuarios[chromium]&#34;, &#34;duration&#34;: &#34;525 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0005_validar_formulario_usuarios[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;525 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0006_flujo_creacion_rol[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0006_flujo_creacion_rol[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0006_flujo_creacion_rol[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0007_flujo_registro_usuario_valido[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0007_flujo_registro_usuario_valido[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0007_flujo_registro_usuario_valido[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0008_filtro_dinamico_usuarios[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0008_filtro_dinamico_usuarios[chromium]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0008_filtro_dinamico_usuarios[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0009_modal_edicion_usuario[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0009_modal_edicion_usuario[chromium]&#34;, &#34;duration&#34;: &#34;801 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0009_modal_edicion_usuario[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;801 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0010_botones_mantenimiento[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0010_botones_mantenimiento[chromium]&#34;, &#34;duration&#34;: &#34;554 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0010_botones_mantenimiento[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;554 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-1-1 car\\xe1cter]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-1-1 car\\xe1cter]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-1-1 car\\xe1cter]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-12-2 caracteres]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-12-2 caracteres]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-12-2 caracteres]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-123-3 caracteres]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-123-3 caracteres]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-123-3 caracteres]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-1234-4 caracteres]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-1234-4 caracteres]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-1234-4 caracteres]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-12345-5 caracteres]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-12345-5 caracteres]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-12345-5 caracteres]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-123456-6 caracteres]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-123456-6 caracteres]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-123456-6 caracteres]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-1234567-7 caracteres]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-1234567-7 caracteres]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-1234567-7 caracteres]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-a@1-3 caracteres con @]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-a@1-3 caracteres con @]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-a@1-3 caracteres con @]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-ab#12-5 caracteres con #]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-ab#12-5 caracteres con #]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-ab#12-5 caracteres con #]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-pass@1-6 caracteres con @]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-pass@1-6 caracteres con @]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-pass@1-6 caracteres con @]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-Clav$1-6 caracteres con $]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-Clav$1-6 caracteres con $]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-Clav$1-6 caracteres con $]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-Qw1!-4 caracteres con !]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-Qw1!-4 caracteres con !]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-Qw1!-4 caracteres con !]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-abc*12-6 caracteres con *]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-abc*12-6 caracteres con *]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-abc*12-6 caracteres con *]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-a&amp;b123-6 caracteres con &amp;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-a&amp;b123-6 caracteres con &amp;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-a&amp;b123-6 caracteres con &amp;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-xyz_1-5 caracteres con _]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-xyz_1-5 caracteres con _]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_longitud_corta[chromium-xyz_1-5 caracteres con _]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-PasswordSeguro1-Sin car\\xe1cter especial (15 car)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-PasswordSeguro1-Sin car\\xe1cter especial (15 car)]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-PasswordSeguro1-Sin car\\xe1cter especial (15 car)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-MiClaveSegura99-Solo alfanum\\xe9rica]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-MiClaveSegura99-Solo alfanum\\xe9rica]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-MiClaveSegura99-Solo alfanum\\xe9rica]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-Abcdefgh123456-May\\xfasculas y min\\xfasculas sin s\\xedmbolo]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-Abcdefgh123456-May\\xfasculas y min\\xfasculas sin s\\xedmbolo]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-Abcdefgh123456-May\\xfasculas y min\\xfasculas sin s\\xedmbolo]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-AdminUsuarios2026-Texto y n\\xfamero sin s\\xedmbolo]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-AdminUsuarios2026-Texto y n\\xfamero sin s\\xedmbolo]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-AdminUsuarios2026-Texto y n\\xfamero sin s\\xedmbolo]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-Sololetrasypunto.-Con punto no admitido como especial]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-Sololetrasypunto.-Con punto no admitido como especial]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-Sololetrasypunto.-Con punto no admitido como especial]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-clave12345678-Solo min\\xfasculas y n\\xfameros]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-clave12345678-Solo min\\xfasculas y n\\xfameros]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-clave12345678-Solo min\\xfasculas y n\\xfameros]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-SEGURIDADTOTAL2026-Solo may\\xfasculas y n\\xfameros]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-SEGURIDADTOTAL2026-Solo may\\xfasculas y n\\xfameros]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-SEGURIDADTOTAL2026-Solo may\\xfasculas y n\\xfameros]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-PruebaLargaSinSimbolo-Cadena larga alfanum\\xe9rica]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-PruebaLargaSinSimbolo-Cadena larga alfanum\\xe9rica]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_falta_caracter_especial[chromium-PruebaLargaSinSimbolo-Cadena larga alfanum\\xe9rica]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password#2026-# (Almohadilla / Hash)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password#2026-# (Almohadilla / Hash)]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password#2026-# (Almohadilla / Hash)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password$2026-$ (Signo de D\\xf3lar)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password$2026-$ (Signo de D\\xf3lar)]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password$2026-$ (Signo de D\\xf3lar)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password@2026-@ (Arroba)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password@2026-@ (Arroba)]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password@2026-@ (Arroba)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password!2026-! (Signo de Exclamaci\\xf3n)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password!2026-! (Signo de Exclamaci\\xf3n)]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password!2026-! (Signo de Exclamaci\\xf3n)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password%2026-% (Porcentaje)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password%2026-% (Porcentaje)]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password%2026-% (Porcentaje)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password*2026-* (Asterisco)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password*2026-* (Asterisco)]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password*2026-* (Asterisco)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password?2026-? (Signo de Interrogaci\\xf3n)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password?2026-? (Signo de Interrogaci\\xf3n)]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password?2026-? (Signo de Interrogaci\\xf3n)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password&amp;2026-&amp; (Ampersand)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password&amp;2026-&amp; (Ampersand)]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password&amp;2026-&amp; (Ampersand)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password_2026-_ (Guion bajo)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password_2026-_ (Guion bajo)]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password_2026-_ (Guion bajo)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password-2026-- (Guion medio)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password-2026-- (Guion medio)]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_password_simbolo_valido_admitido[chromium-Password-2026-- (Guion medio)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-PasswordSeguro123#-Diferente car\\xe1cter especial]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-PasswordSeguro123#-Diferente car\\xe1cter especial]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-PasswordSeguro123#-Diferente car\\xe1cter especial]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-passwordseguro123@-Diferente may\\xfascula / min\\xfascula]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-passwordseguro123@-Diferente may\\xfascula / min\\xfascula]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-passwordseguro123@-Diferente may\\xfascula / min\\xfascula]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-PasswordSeguro123-Falta car\\xe1cter especial en confirmaci\\xf3n]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-PasswordSeguro123-Falta car\\xe1cter especial en confirmaci\\xf3n]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-PasswordSeguro123-Falta car\\xe1cter especial en confirmaci\\xf3n]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-PasswordSeguro1234@-N\\xfamero extra en confirmaci\\xf3n]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-PasswordSeguro1234@-N\\xfamero extra en confirmaci\\xf3n]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-PasswordSeguro1234@-N\\xfamero extra en confirmaci\\xf3n]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-OtraPassword999$-Contrase\\xf1a totalmente distinta]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-OtraPassword999$-Contrase\\xf1a totalmente distinta]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-PasswordSeguro123@-OtraPassword999$-Contrase\\xf1a totalmente distinta]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-AdminPass#2026-AdminPass#2025-Diferencia de un d\\xedgito final]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-AdminPass#2026-AdminPass#2025-Diferencia de un d\\xedgito final]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-AdminPass#2026-AdminPass#2025-Diferencia de un d\\xedgito final]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-MiClaveFuerte$1-MiClaveFuerte$2-Diferencia num\\xe9rica final]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-MiClaveFuerte$1-MiClaveFuerte$2-Diferencia num\\xe9rica final]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-MiClaveFuerte$1-MiClaveFuerte$2-Diferencia num\\xe9rica final]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-UteqSegura@2026-UteqSegura@2027-Diferencia en a\\xf1o de confirmaci\\xf3n]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-UteqSegura@2026-UteqSegura@2027-Diferencia en a\\xf1o de confirmaci\\xf3n]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_contrasenas_no_coinciden[chromium-UteqSegura@2026-UteqSegura@2027-Diferencia en a\\xf1o de confirmaci\\xf3n]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-correosin_arroba.com-Sin s\\xedmbolo arroba]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-correosin_arroba.com-Sin s\\xedmbolo arroba]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-correosin_arroba.com-Sin s\\xedmbolo arroba]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@invalido.org-Dominio .org no autorizado]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@invalido.org-Dominio .org no autorizado]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@invalido.org-Dominio .org no autorizado]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@tempmail.com-Servicio temporal descartable]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@tempmail.com-Servicio temporal descartable]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@tempmail.com-Servicio temporal descartable]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@mailinator.com-Bandeja desechable p\\xfablica]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@mailinator.com-Bandeja desechable p\\xfablica]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@mailinator.com-Bandeja desechable p\\xfablica]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@fake.net-Dominio .net no institucional ni p\\xfablico admitido]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@fake.net-Dominio .net no institucional ni p\\xfablico admitido]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@fake.net-Dominio .net no institucional ni p\\xfablico admitido]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@spam.xyz-Dominio spam TLD .xyz]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@spam.xyz-Dominio spam TLD .xyz]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@spam.xyz-Dominio spam TLD .xyz]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@dominio-desconocido.es-Dominio regional no registrado]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@dominio-desconocido.es-Dominio regional no registrado]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@dominio-desconocido.es-Dominio regional no registrado]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@correo-falso.com-Dominio gen\\xe9rico no admitido]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@correo-falso.com-Dominio gen\\xe9rico no admitido]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@correo-falso.com-Dominio gen\\xe9rico no admitido]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-@gmail.com-Sin identificador de usuario antes de arroba]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-@gmail.com-Sin identificador de usuario antes de arroba]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-@gmail.com-Sin identificador de usuario antes de arroba]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@.com-Dominio incompleto]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@.com-Dominio incompleto]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_correos_dominios_no_permitidos[chromium-usuario@.com-Dominio incompleto]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-gmail.com-Google Mail P\\xfablico]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-gmail.com-Google Mail P\\xfablico]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-gmail.com-Google Mail P\\xfablico]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-uteq.edu.mx-Universidad Tecnol\\xf3gica de Quer\\xe9taro]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-uteq.edu.mx-Universidad Tecnol\\xf3gica de Quer\\xe9taro]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-uteq.edu.mx-Universidad Tecnol\\xf3gica de Quer\\xe9taro]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-hotmail.com-Microsoft Hotmail]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-hotmail.com-Microsoft Hotmail]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-hotmail.com-Microsoft Hotmail]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-outlook.com-Microsoft Outlook]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-outlook.com-Microsoft Outlook]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-outlook.com-Microsoft Outlook]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-empresa.com-Dominio Corporativo Empresa]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-empresa.com-Dominio Corporativo Empresa]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_validacion_dominios_autorizados_exito[chromium-empresa.com-Dominio Corporativo Empresa]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0101_rechazo_correo_duplicado[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0101_rechazo_correo_duplicado[chromium]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0101_rechazo_correo_duplicado[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#app-title-T\\xedtulo principal H1]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#app-title-T\\xedtulo principal H1]&#34;, &#34;duration&#34;: &#34;642 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#app-title-T\\xedtulo principal H1]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;642 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-.subtitle-Subt\\xedtulo de tecnolog\\xedas]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-.subtitle-Subt\\xedtulo de tecnolog\\xedas]&#34;, &#34;duration&#34;: &#34;629 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-.subtitle-Subt\\xedtulo de tecnolog\\xedas]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;629 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#health-pill-Pill indicador de salud]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#health-pill-Pill indicador de salud]&#34;, &#34;duration&#34;: &#34;647 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#health-pill-Pill indicador de salud]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;647 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#status-dot-Punto verde pulsante]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#status-dot-Punto verde pulsante]&#34;, &#34;duration&#34;: &#34;649 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#status-dot-Punto verde pulsante]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;649 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#health-status-Texto de estado health]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#health-status-Texto de estado health]&#34;, &#34;duration&#34;: &#34;707 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#health-status-Texto de estado health]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;707 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#health-latency-Etiqueta de latencia]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#health-latency-Etiqueta de latencia]&#34;, &#34;duration&#34;: &#34;583 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#health-latency-Etiqueta de latencia]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;583 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-refrescar-Bot\\xf3n de actualizaci\\xf3n]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-refrescar-Bot\\xf3n de actualizaci\\xf3n]&#34;, &#34;duration&#34;: &#34;606 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-refrescar-Bot\\xf3n de actualizaci\\xf3n]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;606 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-usuarios-Tarjeta m\\xe9trica usuarios]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-usuarios-Tarjeta m\\xe9trica usuarios]&#34;, &#34;duration&#34;: &#34;642 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-usuarios-Tarjeta m\\xe9trica usuarios]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;642 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-roles-Tarjeta m\\xe9trica roles]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-roles-Tarjeta m\\xe9trica roles]&#34;, &#34;duration&#34;: &#34;633 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-roles-Tarjeta m\\xe9trica roles]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;633 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-health-Tarjeta m\\xe9trica salud]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-health-Tarjeta m\\xe9trica salud]&#34;, &#34;duration&#34;: &#34;626 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-health-Tarjeta m\\xe9trica salud]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;626 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-timestamp-Timestamp de \\xfaltima comprobaci\\xf3n]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-timestamp-Timestamp de \\xfaltima comprobaci\\xf3n]&#34;, &#34;duration&#34;: &#34;629 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-timestamp-Timestamp de \\xfaltima comprobaci\\xf3n]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;629 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-entorno-Etiqueta de entorno AWS/Docker]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-entorno-Etiqueta de entorno AWS/Docker]&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#stat-entorno-Etiqueta de entorno AWS/Docker]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#badge-total-roles-Insignia contador de roles]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#badge-total-roles-Insignia contador de roles]&#34;, &#34;duration&#34;: &#34;616 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#badge-total-roles-Insignia contador de roles]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;616 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-rol-nombre-Campo texto nombre de rol]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-rol-nombre-Campo texto nombre de rol]&#34;, &#34;duration&#34;: &#34;597 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-rol-nombre-Campo texto nombre de rol]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;597 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-crear-rol-Bot\\xf3n registrar rol]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-crear-rol-Bot\\xf3n registrar rol]&#34;, &#34;duration&#34;: &#34;610 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-crear-rol-Bot\\xf3n registrar rol]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;610 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#tabla-roles-Tabla contenedora de roles]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#tabla-roles-Tabla contenedora de roles]&#34;, &#34;duration&#34;: &#34;588 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#tabla-roles-Tabla contenedora de roles]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;588 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-nombre-Campo texto nombre completo]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-nombre-Campo texto nombre completo]&#34;, &#34;duration&#34;: &#34;627 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-nombre-Campo texto nombre completo]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;627 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-correo-Campo email usuario]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-correo-Campo email usuario]&#34;, &#34;duration&#34;: &#34;628 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-correo-Campo email usuario]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;628 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-password-Campo contrase\\xf1a]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-password-Campo contrase\\xf1a]&#34;, &#34;duration&#34;: &#34;632 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-password-Campo contrase\\xf1a]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;632 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-confirm-password-Campo confirmaci\\xf3n de contrase\\xf1a]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-confirm-password-Campo confirmaci\\xf3n de contrase\\xf1a]&#34;, &#34;duration&#34;: &#34;631 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#input-usuario-confirm-password-Campo confirmaci\\xf3n de contrase\\xf1a]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;631 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#select-usuario-rol-Men\\xfa desplegable selector de rol]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#select-usuario-rol-Men\\xfa desplegable selector de rol]&#34;, &#34;duration&#34;: &#34;638 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#select-usuario-rol-Men\\xfa desplegable selector de rol]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;638 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-crear-usuario-Bot\\xf3n principal guardar usuario]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-crear-usuario-Bot\\xf3n principal guardar usuario]&#34;, &#34;duration&#34;: &#34;652 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-crear-usuario-Bot\\xf3n principal guardar usuario]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;652 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#filtro-usuarios-Buscador predictivo]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#filtro-usuarios-Buscador predictivo]&#34;, &#34;duration&#34;: &#34;632 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#filtro-usuarios-Buscador predictivo]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;632 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#tabla-usuarios-Tabla principal de cat\\xe1logo]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#tabla-usuarios-Tabla principal de cat\\xe1logo]&#34;, &#34;duration&#34;: &#34;599 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#tabla-usuarios-Tabla principal de cat\\xe1logo]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;599 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#cuerpo-tabla-usuarios-Cuerpo din\\xe1mico de tabla usuarios]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#cuerpo-tabla-usuarios-Cuerpo din\\xe1mico de tabla usuarios]&#34;, &#34;duration&#34;: &#34;725 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#cuerpo-tabla-usuarios-Cuerpo din\\xe1mico de tabla usuarios]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;725 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-seed-db-Bot\\xf3n sembrado de datos ficticios]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-seed-db-Bot\\xf3n sembrado de datos ficticios]&#34;, &#34;duration&#34;: &#34;577 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-seed-db-Bot\\xf3n sembrado de datos ficticios]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;577 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-backup-db-Bot\\xf3n descarga de respaldo SQLite]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-backup-db-Bot\\xf3n descarga de respaldo SQLite]&#34;, &#34;duration&#34;: &#34;649 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-backup-db-Bot\\xf3n descarga de respaldo SQLite]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;649 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-vaciar-db-Bot\\xf3n vaciado de base de datos]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-vaciar-db-Bot\\xf3n vaciado de base de datos]&#34;, &#34;duration&#34;: &#34;808 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#btn-vaciar-db-Bot\\xf3n vaciado de base de datos]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;808 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#modal-editar-Modal emergente de edici\\xf3n]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#modal-editar-Modal emergente de edici\\xf3n]&#34;, &#34;duration&#34;: &#34;817 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#modal-editar-Modal emergente de edici\\xf3n]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;817 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#host-info-C\\xf3digo indicador de host]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#host-info-C\\xf3digo indicador de host]&#34;, &#34;duration&#34;: &#34;721 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_consistencia_dom_elementos_ui[chromium-#host-info-C\\xf3digo indicador de host]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;721 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-320-568-M\\xf3vil Extra Compacto (iPhone SE Gen 1)]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-320-568-M\\xf3vil Extra Compacto (iPhone SE Gen 1)]&#34;, &#34;duration&#34;: &#34;724 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-320-568-M\\xf3vil Extra Compacto (iPhone SE Gen 1)]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;724 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-360-640-M\\xf3vil Android Compacto]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-360-640-M\\xf3vil Android Compacto]&#34;, &#34;duration&#34;: &#34;755 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-360-640-M\\xf3vil Android Compacto]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;755 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-375-667-M\\xf3vil iPhone 8 / SE]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-375-667-M\\xf3vil iPhone 8 / SE]&#34;, &#34;duration&#34;: &#34;757 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-375-667-M\\xf3vil iPhone 8 / SE]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;757 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-390-844-M\\xf3vil Moderno iPhone 13 / 14]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-390-844-M\\xf3vil Moderno iPhone 13 / 14]&#34;, &#34;duration&#34;: &#34;691 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-390-844-M\\xf3vil Moderno iPhone 13 / 14]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;691 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-412-915-M\\xf3vil Android Samsung Galaxy / Pixel]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-412-915-M\\xf3vil Android Samsung Galaxy / Pixel]&#34;, &#34;duration&#34;: &#34;979 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-412-915-M\\xf3vil Android Samsung Galaxy / Pixel]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;979 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-768-1024-Tableta iPad Mini / Cl\\xe1sico Vertical]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-768-1024-Tableta iPad Mini / Cl\\xe1sico Vertical]&#34;, &#34;duration&#34;: &#34;741 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-768-1024-Tableta iPad Mini / Cl\\xe1sico Vertical]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;741 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-820-1180-Tableta iPad Air]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-820-1180-Tableta iPad Air]&#34;, &#34;duration&#34;: &#34;770 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-820-1180-Tableta iPad Air]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;770 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1024-768-Tableta / Laptop Apaisada]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1024-768-Tableta / Laptop Apaisada]&#34;, &#34;duration&#34;: &#34;730 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1024-768-Tableta / Laptop Apaisada]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;730 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1280-720-Resoluci\\xf3n HD 720p]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1280-720-Resoluci\\xf3n HD 720p]&#34;, &#34;duration&#34;: &#34;890 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1280-720-Resoluci\\xf3n HD 720p]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;890 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1366-768-Laptop Est\\xe1ndar WXGA]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1366-768-Laptop Est\\xe1ndar WXGA]&#34;, &#34;duration&#34;: &#34;784 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1366-768-Laptop Est\\xe1ndar WXGA]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;784 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1440-900-MacBook Pro 15]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1440-900-MacBook Pro 15]&#34;, &#34;duration&#34;: &#34;696 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1440-900-MacBook Pro 15]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;696 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1536-864-Laptop FullHD Escalada]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1536-864-Laptop FullHD Escalada]&#34;, &#34;duration&#34;: &#34;642 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1536-864-Laptop FullHD Escalada]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;642 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1920-1080-Escritorio Full HD 1080p]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1920-1080-Escritorio Full HD 1080p]&#34;, &#34;duration&#34;: &#34;695 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-1920-1080-Escritorio Full HD 1080p]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;695 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-2560-1440-Monitor QHD / 2K]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-2560-1440-Monitor QHD / 2K]&#34;, &#34;duration&#34;: &#34;802 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-2560-1440-Monitor QHD / 2K]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;802 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-3840-2160-Pantalla Ultra HD / 4K]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-3840-2160-Pantalla Ultra HD / 4K]&#34;, &#34;duration&#34;: &#34;731 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_renderizado_resolucion_viewport[chromium-3840-2160-Pantalla Ultra HD / 4K]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;731 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0161_latencia_endpoint_health[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0161_latencia_endpoint_health[chromium]&#34;, &#34;duration&#34;: &#34;243 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0161_latencia_endpoint_health[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;243 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_0162_latencia_catalogo_usuarios[chromium]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_0162_latencia_catalogo_usuarios[chromium]&#34;, &#34;duration&#34;: &#34;181 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_0162_latencia_catalogo_usuarios[chromium]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;181 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Brisa-B\\xfasqueda por nombre de Administrador &#39;Brisa&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Brisa-B\\xfasqueda por nombre de Administrador &#39;Brisa&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Brisa-B\\xfasqueda por nombre de Administrador &#39;Brisa&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Granados-B\\xfasqueda por apellido &#39;Granados&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Granados-B\\xfasqueda por apellido &#39;Granados&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Granados-B\\xfasqueda por apellido &#39;Granados&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-uteq.edu.mx-Filtrado por dominio institucional &#39;uteq.edu.mx&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-uteq.edu.mx-Filtrado por dominio institucional &#39;uteq.edu.mx&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-uteq.edu.mx-Filtrado por dominio institucional &#39;uteq.edu.mx&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Emmanuel-B\\xfasqueda de docente/supervisor &#39;Emmanuel&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Emmanuel-B\\xfasqueda de docente/supervisor &#39;Emmanuel&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Emmanuel-B\\xfasqueda de docente/supervisor &#39;Emmanuel&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Carlos-B\\xfasqueda de operador &#39;Carlos&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Carlos-B\\xfasqueda de operador &#39;Carlos&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Carlos-B\\xfasqueda de operador &#39;Carlos&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-gmail.com-Filtrado por dominio p\\xfablico &#39;gmail.com&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-gmail.com-Filtrado por dominio p\\xfablico &#39;gmail.com&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-gmail.com-Filtrado por dominio p\\xfablico &#39;gmail.com&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Mariana-B\\xfasqueda de auditor &#39;Mariana&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Mariana-B\\xfasqueda de auditor &#39;Mariana&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Mariana-B\\xfasqueda de auditor &#39;Mariana&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-hotmail.com-Filtrado por dominio &#39;hotmail.com&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-hotmail.com-Filtrado por dominio &#39;hotmail.com&#39;]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-hotmail.com-Filtrado por dominio &#39;hotmail.com&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Rodrigo-B\\xfasqueda de usuario &#39;Rodrigo&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Rodrigo-B\\xfasqueda de usuario &#39;Rodrigo&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Rodrigo-B\\xfasqueda de usuario &#39;Rodrigo&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-empresa.com-Filtrado por dominio corporativo &#39;empresa.com&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-empresa.com-Filtrado por dominio corporativo &#39;empresa.com&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-empresa.com-Filtrado por dominio corporativo &#39;empresa.com&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Sof\\xeda-B\\xfasqueda con acento &#39;Sof\\xeda&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Sof\\xeda-B\\xfasqueda con acento &#39;Sof\\xeda&#39;]&#34;, &#34;duration&#34;: &#34;993 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-Sof\\xeda-B\\xfasqueda con acento &#39;Sof\\xeda&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;993 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-outlook.com-Filtrado por dominio &#39;outlook.com&#39;]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-outlook.com-Filtrado por dominio &#39;outlook.com&#39;]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_busqueda_filtrado_usuarios_ficticios[chromium-outlook.com-Filtrado por dominio &#39;outlook.com&#39;]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/health-200-Healthcheck con estado de servidor]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/health-200-Healthcheck con estado de servidor]&#34;, &#34;duration&#34;: &#34;168 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/health-200-Healthcheck con estado de servidor]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;168 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/roles-200-Listado de cat\\xe1logo de roles]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/roles-200-Listado de cat\\xe1logo de roles]&#34;, &#34;duration&#34;: &#34;130 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/roles-200-Listado de cat\\xe1logo de roles]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;130 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/usuarios-200-Listado general de usuarios]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/usuarios-200-Listado general de usuarios]&#34;, &#34;duration&#34;: &#34;154 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/usuarios-200-Listado general de usuarios]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;154 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/endpoint-no-existente-404-404-Manejo de ruta inexistente]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/endpoint-no-existente-404-404-Manejo de ruta inexistente]&#34;, &#34;duration&#34;: &#34;165 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrato_api_codigos_http[chromium-/api/endpoint-no-existente-404-404-Manejo de ruta inexistente]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;165 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Clave@12345-@ en posici\\xf3n 6]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Clave@12345-@ en posici\\xf3n 6]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Clave@12345-@ en posici\\xf3n 6]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-!Clave12345-! al inicio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-!Clave12345-! al inicio]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-!Clave12345-! al inicio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Clave12345!-! al final]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Clave12345!-! al final]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Clave12345!-! al final]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Segura#2026-# intermedio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Segura#2026-# intermedio]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Segura#2026-# intermedio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-$Segura2026-$ al inicio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-$Segura2026-$ al inicio]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-$Segura2026-$ al inicio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Segura2026$-$ al final]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Segura2026$-$ al final]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Segura2026$-$ al final]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Admin%2026A-% intermedio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Admin%2026A-% intermedio]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Admin%2026A-% intermedio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-*Admin2026A-* al inicio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-*Admin2026A-* al inicio]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-*Admin2026A-* al inicio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Admin2026A*-* al final]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Admin2026A*-* al final]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Admin2026A*-* al final]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Super&amp;User1-&amp; intermedio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Super&amp;User1-&amp; intermedio]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Super&amp;User1-&amp; intermedio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Super_User1-_ intermedio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Super_User1-_ intermedio]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Super_User1-_ intermedio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Super-User1-- intermedio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Super-User1-- intermedio]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Super-User1-- intermedio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Test?User26-? intermedio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Test?User26-? intermedio]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Test?User26-? intermedio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-P@ssw0rd!#$-M\\xfaltiples caracteres especiales]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-P@ssw0rd!#$-M\\xfaltiples caracteres especiales]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-P@ssw0rd!#$-M\\xfaltiples caracteres especiales]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Uteq_10mo#A-Combinaci\\xf3n alfanum\\xe9rica y dos s\\xedmbolos]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Uteq_10mo#A-Combinaci\\xf3n alfanum\\xe9rica y dos s\\xedmbolos]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_contrasena_posicion_caracter_especial[chromium-Uteq_10mo#A-Combinaci\\xf3n alfanum\\xe9rica y dos s\\xedmbolos]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Auditor-Calidad-Rol con guion medio]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Auditor-Calidad-Rol con guion medio]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Auditor-Calidad-Rol con guion medio]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Lider_Seguridad-Rol con guion bajo]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Lider_Seguridad-Rol con guion bajo]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Lider_Seguridad-Rol con guion bajo]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Soporte.Nivel2-Rol con punto]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Soporte.Nivel2-Rol con punto]&#34;, &#34;duration&#34;: &#34;00:00:04&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Soporte.Nivel2-Rol con punto]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:04&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-AdminGeneral2026-Rol alfanum\\xe9rico]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-AdminGeneral2026-Rol alfanum\\xe9rico]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-AdminGeneral2026-Rol alfanum\\xe9rico]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Super_Admin_Global-Rol compuesto triple]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Super_Admin_Global-Rol compuesto triple]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Super_Admin_Global-Rol compuesto triple]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Tester_Playwright-Rol de pruebas]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Tester_Playwright-Rol de pruebas]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Tester_Playwright-Rol de pruebas]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-DevOps_Engineer-Rol de infraestructura]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-DevOps_Engineer-Rol de infraestructura]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-DevOps_Engineer-Rol de infraestructura]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Analista_Datos-Rol anal\\xedtico]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Analista_Datos-Rol anal\\xedtico]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Analista_Datos-Rol anal\\xedtico]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Coordinador_TI-Rol administrativo]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Coordinador_TI-Rol administrativo]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Coordinador_TI-Rol administrativo]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Invitado_Temporal-Rol restringido]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Invitado_Temporal-Rol restringido]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Invitado_Temporal-Rol restringido]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Gerente_Ventas-Rol comercial]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Gerente_Ventas-Rol comercial]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Gerente_Ventas-Rol comercial]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Director_Operaciones-Rol directivo]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Director_Operaciones-Rol directivo]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Director_Operaciones-Rol directivo]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Auditor_Financiero-Rol financiero]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Auditor_Financiero-Rol financiero]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Auditor_Financiero-Rol financiero]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Especialista_Redes-Rol telecomunicaciones]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Especialista_Redes-Rol telecomunicaciones]&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Especialista_Redes-Rol telecomunicaciones]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Seguridad_Perimetral-Rol ciberseguridad]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Seguridad_Perimetral-Rol ciberseguridad]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests_e2e/test_frontend_usuarios.py::test_creacion_roles_diversos[chromium-Seguridad_Perimetral-Rol ciberseguridad]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;reporte_playwright_usuarios.html&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+  </body>
+</html>

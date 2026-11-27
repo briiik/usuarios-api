@@ -44,7 +44,7 @@ describe("Endpoints de Usuarios (/api/usuarios)", () => {
       .send({
         nombre: "Carlos Gomez",
         correo: `carlos-${sufijo}@empresa.com`,
-        password: "passwordSeguro123",
+        password: "PasswordSeguro123@",
         rolId: rolIdDefault
       });
 
@@ -205,5 +205,76 @@ describe("Endpoints de Usuarios (/api/usuarios)", () => {
 
     expect(res.statusCode).toBe(404);
     expect(res.body.statusCode).toBe(404);
+  });
+
+  test("POST /api/usuarios con contraseña corta (<8 car) debe retornar 400", async () => {
+    const res = await request(app)
+      .post("/api/usuarios")
+      .send({
+        nombre: "Test Corto",
+        correo: `corto-${Date.now()}@uteq.edu.mx`,
+        password: "123@",
+        rolId: rolIdDefault
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toContain("longitud mínima de 8 caracteres");
+  });
+
+  test("POST /api/usuarios con contraseña sin carácter especial debe retornar 400", async () => {
+    const res = await request(app)
+      .post("/api/usuarios")
+      .send({
+        nombre: "Test Sin Especial",
+        correo: `sinesp-${Date.now()}@gmail.com`,
+        password: "PasswordLarga123",
+        rolId: rolIdDefault
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toContain("carácter especial");
+  });
+
+  test("POST /api/usuarios con contraseñas que no coinciden debe retornar 400", async () => {
+    const res = await request(app)
+      .post("/api/usuarios")
+      .send({
+        nombre: "Test Password Mismatch",
+        correo: `mismatch-${Date.now()}@hotmail.com`,
+        password: "PasswordSegura123@",
+        confirmPassword: "PasswordDiferente456#",
+        rolId: rolIdDefault
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toContain("no coinciden");
+  });
+
+  test("POST /api/usuarios con dominio no permitido debe retornar 400", async () => {
+    const res = await request(app)
+      .post("/api/usuarios")
+      .send({
+        nombre: "Test Dominio Invalido",
+        correo: `invalido-${Date.now()}@dominio-prohibido.org`,
+        password: "PasswordSegura123@",
+        rolId: rolIdDefault
+      });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toContain("no permitido");
+  });
+
+  test("PUT /api/usuarios/:id actualizando contraseña válida debe retornar 200", async () => {
+    const usuario = await crearUsuarioPrueba();
+
+    const res = await request(app)
+      .put(`/api/usuarios/${usuario.id}`)
+      .send({
+        password: "NuevaPassword2026#",
+        confirmPassword: "NuevaPassword2026#"
+      });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toContain("actualizado correctamente");
   });
 });

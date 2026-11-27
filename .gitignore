@@ -18,6 +18,13 @@ yarn-error.log*
 # Variables de entorno
 .env
 .env.local
+.env.*.local
+
+# Python caches y pruebas
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
 
 # Archivos de sistema operativo
 .DS_Store

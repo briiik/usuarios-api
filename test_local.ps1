@@ -83,7 +83,7 @@ try {
     $userBody = @{
         nombre   = "Maria Lopez"
         correo   = "maria-$timestamp@empresa.com"
-        password = "PasswordSeguro123"
+        password = "PasswordSeguro123@"
         rolId    = $rolId
     } | ConvertTo-Json
     $userRes = Invoke-ApiTest -Method "POST" -Path "/api/usuarios" -Body $userBody -ExpectedStatus @(201) -Description "Registrar usuario asociado al rol"
